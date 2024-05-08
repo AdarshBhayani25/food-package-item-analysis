@@ -127,6 +127,7 @@ function App() {
     setExtractedText('');
     setOutputItems([]);
     setError('');
+    setSelectedItemDetails([]);
   };
 
 
@@ -225,12 +226,12 @@ active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow
         {/* <button onClick={reset} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-200 ease-in-out">
           Reset
         </button> */}
-        <button onClick={reset} class="font-bold cursor-pointer transition-all 
+        <button onClick={reset} class=" mt-4 font-bold cursor-pointer transition-all 
 bg-red-500 text-white px-6 py-2 rounded-lg
 border-yellow-400
 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
-active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow-xl hover:shadow-yellow-100 shadow-orange-300 active:shadow-none">
-  Button
+active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow-xl hover:shadow-yellow-100 shadow-orange-300 active:shadow-none ">
+  reset
 </button>
       </div>
       </div>
