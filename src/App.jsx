@@ -37,16 +37,39 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoadingsearch, setISLoadingSearch] = useState(false);
 
+  // Function to convert a selected image to a Base64 string
+const getImageAsBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+
+  const getBase64 = async (file) => {
+    const base64 = await getImageAsBase64(file);
+    // Extract the Base64 string without metadata
+    const base64WithoutMetadata = base64.split(',')[1];
+    return base64WithoutMetadata;
+  }
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-  
+    const imageData = await getBase64(image);
     setISLoadingSearch(true);
     const genAI = new GoogleGenerativeAI('AIzaSyD-uyzXfcgIIXgUe2E290JBANROyQILAPE');
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const prompt = `Based on the following text: "${extractedText}", answer the question: ${searchQuery} and if it is not given please answer according to your thinking or past question`;
-  
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    const prompt = `sacn this image,give correct answer the question: ${searchQuery} and if it is not given please answer according to your thinking or past question`;
+    const img = {
+      inlineData: {
+        data: imageData /* see JavaScript quickstart for details */,
+        mimeType: "image/png",
+      },
+    };
     try {
-      const result = await model.generateContent(prompt);
+      const result = await model.generateContent([prompt,img]);
       const response = await result.response;
       setSearchResults(response.text());
     } catch (error) {
@@ -75,6 +98,9 @@ function App() {
   );
   
   const handleUpload = async () => {
+    setSelectedItemDetails([]);
+    setSearchResults([]);
+    setSearchQuery([]);
     setIsLoading(true);
     // Simulate loading state before invoking OCR and AI processing
     setTimeout(async () => {
@@ -87,32 +113,43 @@ function App() {
     setError('');
 
     try {
-      // Perform OCR on the image
-      const worker = await createWorker();
-      await worker.load();
-      await worker.loadLanguage('eng'); // Or other suitable language
-      await worker.initialize('eng');
-      const { data } = await worker.recognize(image);
-      const extractedText = data.text.trim(); // Clean up extracted text
-      setExtractedText(extractedText);
+      // // Perform OCR on the image
+      // const worker = await createWorker();
+      // await worker.load();
+      // await worker.loadLanguage('eng'); // Or other suitable language
+      // await worker.initialize('eng');
+      // const { data } = await worker.recognize(image);
+      // const extractedText = data.text.trim(); // Clean up extracted text
+      // setExtractedText(extractedText);
 
       setIsResultLoading(true)
       const genAI = new GoogleGenerativeAI('AIzaSyD-uyzXfcgIIXgUe2E290JBANROyQILAPE'); // Replace with your API key
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+      const imageData = await getBase64(image);
+
+      console.log(imageData)
 
       // **Sending Text to Gemini Pro (Consider limitations of free API):**
-      const prompt = `Analyze the following text and identify ingredients and all other necessary things which are used in food:\n\n${extractedText} \ngive result items in new lines with numbers`;
-      const result = await model.generateContent(prompt);
+      const prompt = `Analyze the following image and identify only((ingredients and all chemical and food items)) which are used in food which are in image , give result items in new lines with numbers`;
+      const img = {
+        inlineData: {
+          data: imageData /* see JavaScript quickstart for details */,
+          mimeType: "image/png",
+        },
+      };
+      const result = await model.generateContent([prompt,img]);
       const response = await result.response;
       const text = response.text();
+
+      setExtractedText(text);
 
       // Parse response text into an array of items
       const outputItems = text.split('\n').filter(item => item.trim()) // Remove empty lines
         .map((item, index) => ({ id: index + 1, content: item, hoverColor: `hsl(${Math.random() * 360}, 100%, 70%)` })); // Generate random hover colors
 
+        console.log(outputItems);
       setOutputItems(outputItems);
-       
-      await delay(2000)
 
       setIsResultLoading(false)
     } catch (error) {
@@ -134,7 +171,7 @@ function App() {
     const genAI = new GoogleGenerativeAI('AIzaSyD-uyzXfcgIIXgUe2E290JBANROyQILAPE');
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     // const prompt = `Provide detailed information about the ingredient: ${itemContent}. how many quantify are safe for human and child in one day and what is illness are create by this item.all the information are with line number`;
-    const prompt = `generate the health details of the ingredient: ${itemContent}.in first line name of item , 1. Benefits: List the health benefits of consuming the ingredient. 2. Risks: Mention any potential risks or side effects associated with excessive consumption. 3. Safe Consumption: Specify safe consumption limits for adults and children, if available. Please provide this information in the format mentioned above, with each section separated by a colon (:) and a newline`;
+    const prompt = `generate the health details of the ingredient: ${itemContent}.in first line name of item , 1. Safe Consumption: Specify safe consumption limits for adults and children , 2. Benefits: List the health benefits of consuming the ingredient, 3. Risks: Mention any potential risks or side effects associated with excessive consumption. , if available. Please provide this information in the format mentioned above, with each section separated by a colon (:) and a newline`;
     
     try {
       const result = await model.generateContent(prompt);
@@ -170,14 +207,14 @@ function App() {
   //   }
   // }, [image]);
    
-  const containerStyle = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#F3F3F3',
-    backgroundImage: `linear-gradient(0deg, transparent 24%, #E1E1E1 25%, #E1E1E1 26%, transparent 27%, transparent 74%, #E1E1E1 75%, #E1E1E1 76%, transparent 77%, transparent),
-                       linear-gradient(90deg, transparent 24%, #E1E1E1 25%, #E1E1E1 26%, transparent 27%, transparent 74%, #E1E1E1 75%, #E1E1E1 76%, transparent 77%, transparent)`,
-    backgroundSize: '55px 55px'
-  };
+  // const containerStyle = {
+  //   width: '100%',
+  //   height: '100%',
+  //   backgroundColor: '#F3F3F3',
+  //   backgroundImage: `linear-gradient(0deg, transparent 24%, #E1E1E1 25%, #E1E1E1 26%, transparent 27%, transparent 74%, #E1E1E1 75%, #E1E1E1 76%, transparent 77%, transparent),
+  //                      linear-gradient(90deg, transparent 24%, #E1E1E1 25%, #E1E1E1 26%, transparent 27%, transparent 74%, #E1E1E1 75%, #E1E1E1 76%, transparent 77%, transparent)`,
+  //   backgroundSize: '55px 55px'
+  // };
 
   
     return (
@@ -195,7 +232,7 @@ bg-blue-700 text-white px-6 py-2 rounded-lg
 border-indigo-400
 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
 active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow-xl hover:shadow-indigo-300 shadow-indigo-300 active:shadow-none" onClick={handleUpload} disabled={!image || isLoading}>
-  {isLoading ? 'Analyzing...' : 'Analyze Image'}
+  {isResultLoading ? 'Analyzing...' : 'Analyze Image'}
 </button>
         </div>
         <div>
