@@ -33,7 +33,31 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResultLoading, setIsResultLoading] = useState(false);
   const [isItemLoading , setIsItemLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoadingsearch, setISLoadingSearch] = useState(false);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
   
+    setISLoadingSearch(true);
+    const genAI = new GoogleGenerativeAI('AIzaSyD-uyzXfcgIIXgUe2E290JBANROyQILAPE');
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const prompt = `Based on the following text: "${extractedText}", answer the question: ${searchQuery} and if it is not given please answer according to your thinking or past question`;
+  
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      setSearchResults(response.text());
+    } catch (error) {
+      console.error('Error during API call:', error);
+      setSearchResults('Failed to fetch the answer. Please try again.');
+    } finally {
+      setISLoadingSearch(false);
+    }
+  };
+  
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     setImage(file);
@@ -42,10 +66,13 @@ function App() {
     setExtractedText('');
     setOutputItems([]);
     setSelectedItemDetails([]);
+    setSearchResults([]);
     setError('');
   };
 
-  
+  const delay = ms => new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
   
   const handleUpload = async () => {
     setIsLoading(true);
@@ -84,6 +111,9 @@ function App() {
         .map((item, index) => ({ id: index + 1, content: item, hoverColor: `hsl(${Math.random() * 360}, 100%, 70%)` })); // Generate random hover colors
 
       setOutputItems(outputItems);
+       
+      await delay(2000)
+
       setIsResultLoading(false)
     } catch (error) {
       console.error('Error processing image:', error);
@@ -93,6 +123,7 @@ function App() {
         setError('Failed to process image. Please try again, or consider using a paid API for better results.');
       }
     } finally {
+      
       setIsLoading(false);
       // await worker.terminate();
     }
@@ -103,8 +134,7 @@ function App() {
     const genAI = new GoogleGenerativeAI('AIzaSyD-uyzXfcgIIXgUe2E290JBANROyQILAPE');
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     // const prompt = `Provide detailed information about the ingredient: ${itemContent}. how many quantify are safe for human and child in one day and what is illness are create by this item.all the information are with line number`;
-    const prompt = `generate the health details of the ingredient: ${itemContent}. 1. Benefits: List the health benefits of consuming the ingredient. 2. Risks: Mention any potential risks or side effects associated with excessive consumption. 3. Safe Consumption: Specify safe consumption limits for adults and children, if available. Please provide this information in the format mentioned above, with each section separated by a colon (:) and a newline
-    `;
+    const prompt = `generate the health details of the ingredient: ${itemContent}.in first line name of item , 1. Benefits: List the health benefits of consuming the ingredient. 2. Risks: Mention any potential risks or side effects associated with excessive consumption. 3. Safe Consumption: Specify safe consumption limits for adults and children, if available. Please provide this information in the format mentioned above, with each section separated by a colon (:) and a newline`;
     
     try {
       const result = await model.generateContent(prompt);
@@ -128,6 +158,7 @@ function App() {
     setOutputItems([]);
     setError('');
     setSelectedItemDetails([]);
+    setSearchResults([]);
   };
 
 
@@ -179,6 +210,50 @@ active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow
               <p className="border p-2 rounded bg-gray-100">{extractedText}</p>
             )}
           </div>
+          <div className="App p-5">
+  {/* Existing UI code... */}
+
+  {extractedText && (
+    <div className="relative">
+    
+    <div className="mt-2">
+      <input
+        type="text"
+        placeholder="Ask a question about the food..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="border p-2 rounded w-full"
+      />
+    </div>
+    <button
+      onClick={() => handleSearch()}
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+    >
+      {isLoadingsearch ? 'Seacrhing...' : 'Search'}
+    </button>
+  </div>
+  
+
+  )}
+
+  {/* Display search results */}
+  {searchResults && (
+    <div className="mt-4 p-2 bg-gray-100 border rounded">
+      <h2 className="text-lg">Search Results:</h2>
+      {isLoadingsearch ? (<div className="animate-pulse flex flex-col space-y-4 pt-4">
+                <div className="flex flex-row space-x-2">
+                  <div className="h-7 bg-slate-400 w-1/3 rounded-md"></div>
+                  <div className="h-7 bg-slate-400 w-1/3 rounded-md"></div>
+                  <div className="h-7 bg-slate-400 w-1/3 rounded-md"></div>
+                </div>
+              </div> ) : ( <p>{searchResults}</p>)}
+      
+    </div>
+  )}
+
+  {/* Rest of your UI... */}
+</div>
+
           <div>
             <h2 className="text-lg font-bold">Results:</h2>
             {isResultLoading ? (
