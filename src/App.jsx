@@ -102,14 +102,14 @@ const getImageAsBase64 = (file) => {
     setSearchResults([]);
     setSearchQuery([]);
     setIsLoading(true);
-    // Simulate loading state before invoking OCR and AI processing
-    setTimeout(async () => {
-      // Placeholder for actual upload logic
-      setIsLoading(false);
-    }, 2000);
+    // // Simulate loading state before invoking OCR and AI processing
+    // setTimeout(async () => {
+    //   // Placeholder for actual upload logic
+    //   setIsLoading(false);
+    // }, 2000);
   
 
-    setIsLoading(true);
+    
     setError('');
 
     try {
@@ -143,7 +143,7 @@ const getImageAsBase64 = (file) => {
       const text = response.text();
 
       setExtractedText(text);
-
+      setIsLoading(false);
       // Parse response text into an array of items
       const outputItems = text.split('\n').filter(item => item.trim()) // Remove empty lines
         .map((item, index) => ({ id: index + 1, content: item, hoverColor: `hsl(${Math.random() * 360}, 100%, 70%)` })); // Generate random hover colors
