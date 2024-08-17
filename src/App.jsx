@@ -261,7 +261,7 @@ function App() {
             <img
               src={imageUrl}
               alt="Uploaded"
-              className="mt-4 mb-4 max-w-min max-h-min mx-auto  border-black"
+              className="mt-4 mb-4 max-w-md max-h-md  border-black"
             />
           )}
           {/* <button onClick={handleUpload} disabled={!image || isLoading} className="w-full sm:w-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 ease-in-out">
