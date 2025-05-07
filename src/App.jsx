@@ -58,9 +58,9 @@ function App() {
     const imageData = await getBase64(image);
     setISLoadingSearch(true);
     const genAI = new GoogleGenerativeAI(
-      "AIzaSyButeLATkr6F48xCHTOcwTj7EEqv1QgD7M"
+      "AIzaSyD76dqPxJAm94WtunNwlxw_kxzjcXEelOc"
     );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `scan this image,give correct answer the question: ${searchQuery} and if it is not given please answer according to your thinking or past question`;
     const img = {
       inlineData: {
