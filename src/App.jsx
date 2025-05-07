@@ -119,9 +119,9 @@ function App() {
 
       setIsResultLoading(true);
       const genAI = new GoogleGenerativeAI(
-        "AIzaSyButeLATkr6F48xCHTOcwTj7EEqv1QgD7M"
+        "AIzaSyD76dqPxJAm94WtunNwlxw_kxzjcXEelOc"
       ); // Replace with your API key
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const imageData = await getBase64(image);
 
@@ -175,9 +175,9 @@ function App() {
   const handleItemClick = async (itemContent) => {
     setIsItemLoading(true);
     const genAI = new GoogleGenerativeAI(
-      "AIzaSyButeLATkr6F48xCHTOcwTj7EEqv1QgD7M"
+      "AIzaSyD76dqPxJAm94WtunNwlxw_kxzjcXEelOc"
     );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Updated prompt for better structured output
     const prompt = `Provide detailed health information about the ingredient: ${itemContent}.
